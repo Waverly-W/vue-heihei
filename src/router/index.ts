@@ -13,27 +13,30 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomeView, // 首页
-    },
-    {
-      path: '/puzzles',
-      name: 'puzzle-management',
-      component: PuzzleManagement, // 谜题管理
-    },
-    {
-      path: '/reviews',
-      name: 'review-center',
-      component: ReviewCenter, // 审核中心
-    },
-    {
-      path: '/reports',
-      name: 'reports',
-      component: Reports, // 数据报告
-    },
-    {
-      path: '/settings',
-      name: 'settings',
-      component: Settings, // 系统设置
+      component: HomeView,
+      redirect: '/puzzles',
+      children: [
+        {
+          path: 'puzzles',
+          name: 'puzzle-management',
+          component: PuzzleManagement,
+        },
+        {
+          path: 'reviews',
+          name: 'review-center',
+          component: ReviewCenter,
+        },
+        {
+          path: 'reports',
+          name: 'reports',
+          component: Reports,
+        },
+        {
+          path: 'settings',
+          name: 'settings',
+          component: Settings,
+        },
+      ],
     },
   ],
 });

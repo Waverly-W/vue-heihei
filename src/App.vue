@@ -1,15 +1,20 @@
 <template>
-  <div id="app">
-    <RouterView />
-  </div>
+    <div id="app">
+        <RouterView />
+    </div>
 </template>
-
 <style>
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+}
+
 #app {
-  position: relative;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+    height: 100vh;
+    width: 100%;
+    margin: 0;
+    padding: 0;
 }
 </style>
