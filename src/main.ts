@@ -1,25 +1,23 @@
-import { createApp } from 'vue';
-import { createPinia } from 'pinia';
-import App from './App.vue';
-import router from './router';
+import { createApp } from 'vue'
+import { createPinia } from 'pinia'
+import App from './App.vue'
+import router from './router'
 
 // 引入 Ant Design Vue
-import Antd from 'ant-design-vue';
-import 'ant-design-vue/dist/reset.css';// Ant Design Vue 的样式文件
+import Antd from 'ant-design-vue'
+import 'ant-design-vue/dist/reset.css'
 
+// 引入 axios 配置
+import { http } from './utils/http'
 
-// 创建 Vue 应用
-const app = createApp(App);
+const app = createApp(App)
 
-// 使用 Pinia 作为状态管理
-app.use(createPinia());
+// 将 http 实例添加到全局属性中
+app.config.globalProperties.$http = http
 
-// 使用路由
-app.use(router);
+// 使用插件
+app.use(createPinia())
+app.use(router)
+app.use(Antd)
 
-// 使用 Ant Design Vue
-app.use(Antd);
-
-// 挂载应用
-app.mount('#app');
-
+app.mount('#app')
