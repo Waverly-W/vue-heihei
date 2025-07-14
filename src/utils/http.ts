@@ -1,6 +1,6 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios';
 
-const baseURL = import.meta.env.VITE_API_BASE_URL;
+const baseURL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 class HttpService {
   private instance: AxiosInstance;
@@ -9,7 +9,7 @@ class HttpService {
     console.log('API Base URL:', baseURL); // 添加这行来打印基础URL
     this.instance = axios.create({
       baseURL,
-      timeout: 10000,
+      timeout: 100000,
       headers: {
         'Content-Type': 'application/json',
         // 添加CORS相关头

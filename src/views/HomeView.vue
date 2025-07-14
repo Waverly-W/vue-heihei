@@ -27,6 +27,31 @@
             <router-link to="/settings">系统设置</router-link>
           </a-menu-item>
         </a-menu>
+        <div class="user-info">
+          <a-dropdown>
+            <div class="user-avatar-wrapper">
+              <a-avatar icon="user" />
+              <span>管理员</span>
+              <DownOutlined />
+            </div>
+            <template #overlay>
+              <a-menu @click="handleUserMenuClick">
+                <a-menu-item key="settings">
+                  <template #icon>
+                    <SettingOutlined />
+                  </template>
+                  用户设置
+                </a-menu-item>
+                <a-menu-item key="logout" danger>
+                  <template #icon>
+                    <LogoutOutlined />
+                  </template>
+                  退出登录
+                </a-menu-item>
+              </a-menu>
+            </template>
+          </a-dropdown>
+        </div>
       </div>
     </a-layout-header>
     <a-layout-content style="padding: 0 50px">
@@ -41,17 +66,39 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from 'vue';
-import { useRoute } from 'vue-router';
+import { ref, computed, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { 
   FileTextOutlined,
   AuditOutlined,
   BarChartOutlined,
-  SettingOutlined
+  SettingOutlined,
+  DownOutlined,
+  LogoutOutlined
 } from '@ant-design/icons-vue';
+import { message } from 'ant-design-vue';
 
-const selectedKeys = ref<string[]>(['puzzles']);
 const route = useRoute();
+const router = useRouter();
+
+// 根据当前路由计算激活的菜单项
+const selectedKeys = computed(() => {
+  const path = route.path;
+  
+  // 路径映射到菜单key
+  if (path.startsWith('/puzzles')) {
+    return ['puzzles'];
+  } else if (path.startsWith('/reviews')) {
+    return ['reviews'];
+  } else if (path.startsWith('/reports')) {
+    return ['reports'];
+  } else if (path.startsWith('/settings')) {
+    return ['settings'];
+  }
+  
+  // 默认返回题目管理
+  return ['puzzles'];
+});
 
 const currentPage = computed(() => {
   const pathMap: { [key: string]: string } = {
@@ -62,6 +109,17 @@ const currentPage = computed(() => {
   };
   return pathMap[route.path] || 'Home';
 });
+
+// 处理用户菜单点击
+const handleUserMenuClick = ({ key }: { key: string }) => {
+  if (key === 'settings') {
+    router.push('/settings/user-settings')
+  } else if (key === 'logout') {
+    // 这里可以添加退出登录的逻辑
+    message.success('已退出登录')
+    router.push('/login')
+  }
+};
 </script>
 
 <style scoped>
@@ -177,6 +235,25 @@ const currentPage = computed(() => {
   border-radius: 8px;
 }
 
+.user-info {
+  margin-left: 24px;
+}
+
+.user-avatar-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.user-avatar-wrapper:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
 .ant-layout-footer {
   background: #001529;
   color: rgba(255, 255, 255, 0.65);
@@ -199,6 +276,14 @@ const currentPage = computed(() => {
   .nav-menu :deep(.ant-menu-item) {
     padding: 0 12px;
     margin: 0 2px;
+  }
+  
+  .user-info {
+    margin-left: 16px;
+  }
+  
+  .user-avatar-wrapper span {
+    display: none;
   }
 }
 </style>
