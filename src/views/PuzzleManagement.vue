@@ -1,37 +1,31 @@
 <template>
   <div class="puzzle-management">
-    <h1>Puzzle Management</h1>
     <div class="search-form">
       <a-form layout="inline" :model="searchForm">
-        <a-form-item label="难度">
-          <a-select v-model:value="searchForm.difficulty" style="width: 120px" allowClear>
-            <a-select-option 
-              v-for="item in difficultyOptions" 
-              :key="item.valueCode" 
-              :value="item.valueCode"
-            >
-              {{ item.valueName }}
-            </a-select-option>
+        <a-form-item label="标题关键字">
+          <a-input v-model:value="searchForm.titleKeyword" placeholder="请输入标题关键字" style="width: 200px" allowClear />
+        </a-form-item>
+        <a-form-item label="标签">
+          <a-select v-model:value="searchForm.tags" mode="multiple" placeholder="请选择标签" style="width: 200px" allowClear>
+            <a-select-option value="悬疑">悬疑</a-select-option>
+            <a-select-option value="推理">推理</a-select-option>
+            <a-select-option value="恐怖">恐怖</a-select-option>
           </a-select>
         </a-form-item>
         <a-form-item label="状态">
-          <a-select v-model:value="searchForm.isActive" style="width: 120px" allowClear>
-            <a-select-option :value="true">启用</a-select-option>
-            <a-select-option :value="false">禁用</a-select-option>
+          <a-select v-model:value="searchForm.status" style="width: 120px" allowClear>
+            <a-select-option value="ACTIVE">启用</a-select-option>
+            <a-select-option value="INACTIVE">禁用</a-select-option>
           </a-select>
         </a-form-item>
-        <a-form-item label="分数范围" style="width: 300px">
-          <a-slider
-            v-model:value="scoreRange"
-            range
-            :marks="scoreMarks"
-            :step="5"
-            @change="handleScoreChange"
-          >
-            <template #mark="{ label }">
-              {{ label }}
-            </template>
-          </a-slider>
+        <a-form-item label="AI生成">
+          <a-select v-model:value="searchForm.aiGenerated" style="width: 120px" allowClear>
+            <a-select-option :value="true">是</a-select-option>
+            <a-select-option :value="false">否</a-select-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="最小评分">
+          <a-input-number v-model:value="searchForm.minRating" :min="0" :max="5" :step="0.1" style="width: 120px" />
         </a-form-item>
         <a-form-item>
           <a-button type="primary" @click="handleSearch">搜索</a-button>
@@ -46,31 +40,23 @@
         <template v-if="column.key === 'id'">
           {{ record.id }}
         </template>
-        <template v-if="column.key === 'difficultyLevel'">
-          <a-tag :bordered="false" :color="getDifficultyColor(record.difficultyLevel)">
-            {{ record.difficultyLevel }}
+        <template v-if="column.key === 'tags'">
+          <a-tag v-for="tag in record.tags" :key="tag" style="margin: 2px">
+            {{ tag }}
           </a-tag>
         </template>
-        <template v-if="column.key === 'prompt'">
-          <a-tooltip>
-            <template #title>{{ record.prompt }}</template>
-            <span class="ellipsis-text">{{ record.prompt }}</span>
-          </a-tooltip>
+        <template v-if="column.key === 'rating'">
+          <a-tag color="blue">{{ record.rating?.toFixed(1) }}分</a-tag>
         </template>
-        <template v-if="column.key === 'score'">
-          <a-popover title="详细得分">
-            <template #content>
-              <p>逻辑: {{ record.score.logicScore }}</p>
-              <p>趣味: {{ record.score.funScore }}</p>
-              <p>难度: {{ record.score.difficultyScore }}</p>
-              <p>多样性: {{ record.score.diversityScore }}</p>
-              <p>总分: {{ record.score.totalScore }}</p>
-            </template>
-            <p><strong>{{ record.score.totalScore }}</strong></p>
-          </a-popover>
+        <template v-if="column.key === 'status'">
+          <a-tag :color="record.status === 'ACTIVE' ? 'green' : 'red'">
+            {{ record.status === 'ACTIVE' ? '启用' : '禁用' }}
+          </a-tag>
         </template>
-        <template v-if="column.key === 'active'">
-          <a-switch v-model:checked="record.active" @change="(checked) => handleStatusChange(record.id, checked)" />
+        <template v-if="column.key === 'aiGenerated'">
+          <a-tag :color="record.aiGenerated ? 'blue' : 'default'">
+            {{ record.aiGenerated ? 'AI生成' : '手动创建' }}
+          </a-tag>
         </template>
         <template v-if="column.key === 'action'">
           <a-space>
@@ -85,74 +71,114 @@
       v-model:open="detailModalVisible"
       title="题目详情"
       centered
-      width="800px"
+      width="900px"
       @ok="closeDetailModal"
     >
-      <div class="puzzle-details">
-        <h3>汤面</h3>
-        <p>{{ currentPuzzle?.prompt }}</p>
+      <a-descriptions title="海龟汤详情" bordered :column="2">
+        <a-descriptions-item label="ID">{{ currentPuzzle?.id }}</a-descriptions-item>
+        <a-descriptions-item label="标题">{{ currentPuzzle?.title }}</a-descriptions-item>
         
-        <h3>汤底</h3>
-        <pre style="white-space: pre-wrap; word-wrap: break-word;">{{ currentPuzzle?.solution }}</pre>
-        
-        <h3>关键点</h3>
-        <ul style="list-style-type: disc; padding-left: 20px;">
-          <li v-for="(point, index) in currentPuzzle?.keyPoints" :key="index">{{ point }}</li>
-        </ul>
-        
-        <h3>主题标签</h3>
-        <div>
-          <a-tag
-            v-for="(theme, index) in currentPuzzle?.theme"
-            :key="index"
-            style="margin: 4px"
-          >
-            {{ theme }}
+        <a-descriptions-item label="状态">
+          <a-tag :color="currentPuzzle?.status === 'ACTIVE' ? 'green' : 'red'">
+            {{ currentPuzzle?.status === 'ACTIVE' ? '启用' : '禁用' }}
           </a-tag>
-        </div>
-      </div>
+        </a-descriptions-item>
+        
+        <a-descriptions-item label="AI生成">
+          <a-tag :color="currentPuzzle?.aiGenerated ? 'blue' : 'default'">
+            {{ currentPuzzle?.aiGenerated ? 'AI生成' : '手动创建' }}
+          </a-tag>
+        </a-descriptions-item>
+        
+        <a-descriptions-item label="评分">
+          <a-rate :value="currentPuzzle?.rating" disabled allow-half />
+          <span style="margin-left: 8px">{{ currentPuzzle?.rating?.toFixed(1) }}分</span>
+        </a-descriptions-item>
+        
+        <a-descriptions-item label="游戏次数">{{ currentPuzzle?.playCount }}</a-descriptions-item>
+        
+        <a-descriptions-item label="创建者">{{ currentPuzzle?.createdBy }}</a-descriptions-item>
+        
+        <a-descriptions-item label="创建时间">{{ formatDateTime(currentPuzzle?.createdAt) }}</a-descriptions-item>
+        
+        <a-descriptions-item label="更新时间">{{ formatDateTime(currentPuzzle?.updatedAt) }}</a-descriptions-item>
+        
+        <a-descriptions-item label="标签" :span="2">
+          <a-tag
+            v-for="(tag, index) in currentPuzzle?.tags"
+            :key="index"
+            style="margin: 2px"
+          >
+            {{ tag }}
+          </a-tag>
+        </a-descriptions-item>
+        
+        <a-descriptions-item label="汤面" :span="2">
+          <div style="white-space: pre-wrap; word-wrap: break-word;">{{ currentPuzzle?.description }}</div>
+        </a-descriptions-item>
+        
+        <a-descriptions-item label="汤底" :span="2">
+          <div style="white-space: pre-wrap; word-wrap: break-word; background-color: #f5f5f5; padding: 12px; border-radius: 4px;">
+            {{ currentPuzzle?.answer }}
+          </div>
+        </a-descriptions-item>
+        
+        <a-descriptions-item label="提示" :span="2">
+          <ul style="list-style-type: disc; padding-left: 20px; margin: 0;">
+            <li v-for="(hint, index) in currentPuzzle?.hints" :key="index" style="margin-bottom: 4px;">
+              {{ hint }}
+            </li>
+          </ul>
+        </a-descriptions-item>
+      </a-descriptions>
     </a-modal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, reactive, watch } from 'vue'
+import { ref, onMounted, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { http } from '../utils/http'
-import { Modal } from 'ant-design-vue'
 import type { TablePaginationConfig } from 'ant-design-vue'
-import type { EnumValue } from '../types/PuzzleTypes'
+
+// 时间格式化函数
+const formatDateTime = (dateTimeStr: string) => {
+  if (!dateTimeStr) return ''
+  const date = new Date(dateTimeStr)
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  const seconds = String(date.getSeconds()).padStart(2, '0')
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+}
 
 interface SearchForm {
-  difficulty?: string
-  isActive?: boolean
-  minScore?: string
-  maxScore?: string
+  titleKeyword?: string
+  tags?: string[]
+  status?: string
+  createdBy?: string
+  aiGenerated?: boolean
+  minRating?: number
+  createdAtStart?: string
+  createdAtEnd?: string
 }
 
-interface PuzzleScore {
-  logicScore: number
-  funScore: number
-  difficultyScore: number
-  diversityScore: number
-  totalScore: number
-}
-
-interface PuzzleData {
-  id: number
-  difficultyLevel: string
-  theme: string[]
-  prompt: string
-  solution: string
-  keyPoints: string[]
-  creator: string
-  modifier: string | null
-  versionNumber: number
-  score: PuzzleScore
-  createdDate: number
-  lastModifiedDate: number
-  active: boolean
-  valid: boolean
+interface SoupData {
+  id: string
+  title: string
+  description: string
+  answer: string
+  hints: string[]
+  tags: string[]
+  playCount: number
+  rating: number
+  status: string
+  createdBy: string
+  aiGenerated: boolean
+  createdAt: string
+  updatedAt: string
 }
 
 const router = useRouter()
@@ -162,32 +188,37 @@ const columns = [
     title: 'ID',
     dataIndex: 'id',
     key: 'id',
-    width: 60,
-  },
-  {
-    title: '难度',
-    dataIndex: 'difficultyLevel',
-    key: 'difficultyLevel',
     width: 80,
   },
   {
-    title: '汤面',
-    dataIndex: 'prompt',
-    key: 'prompt',
-    ellipsis: true,
-    width: 300,
+    title: '标题',
+    dataIndex: 'title',
+    key: 'title',
+    width: 200,
+  },
+  {
+    title: '标签',
+    dataIndex: 'tags',
+    key: 'tags',
+    width: 150,
   },
   {
     title: '评分',
-    dataIndex: 'score',
-    key: 'score',
-    width: 80,
+    dataIndex: 'rating',
+    key: 'rating',
+    width: 120,
   },
   {
     title: '状态',
-    dataIndex: 'active',
-    key: 'active',
+    dataIndex: 'status',
+    key: 'status',
     width: 80,
+  },
+  {
+    title: 'AI生成',
+    dataIndex: 'aiGenerated',
+    key: 'aiGenerated',
+    width: 100,
   },
   {
     title: '操作',
@@ -196,9 +227,8 @@ const columns = [
   },
 ]
 
-const tableData = ref<PuzzleData[]>([])
+const tableData = ref<SoupData[]>([])
 const loading = ref(false)
-const activeKeys = reactive<Record<number, string[]>>({})
 
 const pagination = ref<TablePaginationConfig>({
   total: 0,
@@ -210,62 +240,35 @@ const pagination = ref<TablePaginationConfig>({
 })
 
 const searchForm = reactive<SearchForm>({
-  difficulty: undefined,
-  isActive: undefined,
-  minScore: undefined,
-  maxScore: undefined
+  titleKeyword: undefined,
+  tags: undefined,
+  status: undefined,
+  createdBy: undefined,
+  aiGenerated: undefined,
+  minRating: undefined,
+  createdAtStart: undefined,
+  createdAtEnd: undefined
 })
 
-const scoreMarks = {
-  0: '0',
-  20: '20',
-  40: '40',
-  60: '60',
-  80: '80',
-  100: {
-    style: {
-      color: '#f50',
-    },
-    label: '100',
-  },
-}
-
-const scoreRange = ref<[number, number]>([0, 100])
-
-const difficultyOptions = ref<EnumValue[]>([])
 const detailModalVisible = ref<boolean>(false)
-const currentPuzzle = ref<PuzzleData | null>(null)
-
-const handleScoreChange = (value: [number, number]) => {
-  searchForm.minScore = value[0].toString()
-  searchForm.maxScore = value[1].toString()
-}
-
-const getDifficultyColor = (difficulty: string) => {
-  const difficultyItem = difficultyOptions.value.find(item => item.valueName === difficulty)
-  const colors = {
-    "简单": 'green',
-    "中等": 'blue',
-    "困难": 'orange',
-    "专家": 'red'
-  }
-  return colors[difficulty] || 'blue'
-}
+const currentPuzzle = ref<SoupData | null>(null)
 
 const getPuzzles = async (page = 1, pageSize = 10) => {
   loading.value = true
   const params = {
-    pageNumber: page,
+    pageNum: page,
     pageSize: pageSize,
     ...searchForm
   }
   try {
-    const result = await http.post('/manage/puzzle/page', params)
+    const result = await http.get('/m/soup/pageQuery', { params })
     console.log(params, result)
-    tableData.value = result.list
-    pagination.value.total = result.total
-    pagination.value.current = page
-    pagination.value.pageSize = pageSize
+    if ((result.code === 0 || result.code === 200) && result.data) {
+      tableData.value = result.data.rows
+      pagination.value.total = result.data.total
+      pagination.value.current = result.data.pageNum
+      pagination.value.pageSize = result.data.pageSize
+    }
   } catch (error: any) {
     console.error('Error fetching puzzles:', error)
   } finally {
@@ -277,20 +280,10 @@ const handleTableChange = (pag: TablePaginationConfig) => {
   getPuzzles(pag.current, pag.pageSize)
 }
 
-const editPuzzle = (record: PuzzleData) => {
+const editPuzzle = (record: SoupData) => {
   router.push({
     path: `/edit/${record.id}`
   })
-}
-
-const handleStatusChange = async (id: number, status: boolean) => {
-  try {
-    await http.put(`/manage/puzzle/chgSts/${id}`, { active: status })
-    // Refresh the current page data
-    getPuzzles(pagination.value.current, pagination.value.pageSize)
-  } catch (error) {
-    console.error('Failed to update status:', error)
-  }
 }
 
 const handleSearch = () => {
@@ -298,11 +291,14 @@ const handleSearch = () => {
 }
 
 const handleReset = () => {
-  searchForm.difficulty = undefined
-  searchForm.isActive = undefined
-  searchForm.minScore = undefined
-  searchForm.maxScore = undefined
-  scoreRange.value = [0, 100]
+  searchForm.titleKeyword = undefined
+  searchForm.tags = undefined
+  searchForm.status = undefined
+  searchForm.createdBy = undefined
+  searchForm.aiGenerated = undefined
+  searchForm.minRating = undefined
+  searchForm.createdAtStart = undefined
+  searchForm.createdAtEnd = undefined
   getPuzzles(1, pagination.value.pageSize)
 }
 
@@ -310,7 +306,7 @@ const addPuzzle = () => {
   router.push('/create')
 }
 
-const showDetails = (record: PuzzleData) => {
+const showDetails = (record: SoupData) => {
   currentPuzzle.value = record
   detailModalVisible.value = true
 }
@@ -320,19 +316,7 @@ const closeDetailModal = () => {
   currentPuzzle.value = null
 }
 
-const getDifficultyEnum = async () => {
-  try {
-    const result = await http.get('/config/enum/DIFFICULTY')
-    if (result.code === '200' && result.enumValues) {
-      difficultyOptions.value = result.enumValues.filter(item => !item.deleted)
-    }
-  } catch (error) {
-    console.error('获取难度枚举失败:', error)
-  }
-}
-
 onMounted(() => {
-  getDifficultyEnum()
   getPuzzles()
 })
 </script>
@@ -350,37 +334,27 @@ onMounted(() => {
   margin-bottom: 16px;
 }
 
-:deep(.ant-slider) {
-  margin: 8px 10px 32px;
-}
-
-:deep(.ant-slider-mark-text) {
-  font-size: 12px;
-  color: rgba(0, 0, 0, 0.45);
-}
-
-:deep(.ant-slider-with-marks) {
-  margin-bottom: 28px;
-}
-
-:deep(.ant-collapse) {
-  background: transparent;
-  border: none;
-}
-
-:deep(.ant-collapse-header) {
-  padding: 4px 0 !important;
-}
-
-:deep(.ant-collapse-content) {
-  background: transparent;
-}
-
 .ellipsis-text {
   display: inline-block;
-  max-width: 100%;
+  max-width: 280px;
   overflow: hidden;
-  white-space: nowrap;
   text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.puzzle-details h3 {
+  margin-top: 16px;
+  margin-bottom: 8px;
+  color: #1890ff;
+}
+
+.puzzle-details p {
+  margin-bottom: 8px;
 }
 </style>
+
+
+
+
+
+

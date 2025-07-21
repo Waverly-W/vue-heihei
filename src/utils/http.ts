@@ -46,16 +46,25 @@ class HttpService {
         if (error.response) {
           switch (error.response.status) {
             case 401:
-              // 处理未授权错误
+              // 处理未授权错误 - 清除本地存储并跳转到登录页
+              localStorage.removeItem('token');
+              localStorage.removeItem('userInfo');
+              // 如果当前不在登录页，则跳转到登录页
+              if (window.location.pathname !== '/login') {
+                window.location.href = '/login';
+              }
               break;
             case 403:
               // 处理禁止访问错误
+              console.error('访问被禁止');
               break;
             case 404:
               // 处理未找到错误
+              console.error('请求的资源未找到');
               break;
             case 500:
               // 处理服务器错误
+              console.error('服务器内部错误');
               break;
           }
         }

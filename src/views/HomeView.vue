@@ -30,8 +30,11 @@
         <div class="user-info">
           <a-dropdown>
             <div class="user-avatar-wrapper">
-              <a-avatar icon="user" />
-              <span>管理员</span>
+              <a-avatar v-if="userInfo.avatarUrl" :src="userInfo.avatarUrl" />
+              <a-avatar v-else style="color: #f56a00; background-color: #fde3cf">
+                {{ avatarChar }}
+              </a-avatar>
+              <span>{{ displayName }}</span>
               <DownOutlined />
             </div>
             <template #overlay>
@@ -66,7 +69,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { 
   FileTextOutlined,
@@ -74,18 +77,51 @@ import {
   BarChartOutlined,
   SettingOutlined,
   DownOutlined,
-  LogoutOutlined
+  LogoutOutlined,
+  UserOutlined
 } from '@ant-design/icons-vue';
 import { message } from 'ant-design-vue';
+import { clearUserInfo } from '../utils/auth';
+import { http } from '../utils/http';
 
 const route = useRoute();
 const router = useRouter();
+
+// 用户信息
+const userInfo = ref({
+  nickname: '',
+  avatarUrl: '',
+  role: '',
+  level: 0
+});
+
+// 获取用户信息
+const fetchUserInfo = async () => {
+  try {
+    const response = await http.post('/m/admin/auth/userInfo');
+    if (response.code === 0 || response.code === 200) {
+      userInfo.value = response.data;
+    }
+  } catch (error) {
+    console.error('获取用户信息失败:', error);
+  }
+};
+
+// 获取用户显示名称
+const displayName = computed(() => {
+  return userInfo.value.nickname || '管理员';
+});
+
+// 获取头像字符
+const avatarChar = computed(() => {
+  const name = userInfo.value.nickname || '管理员';
+  return name.charAt(0).toUpperCase();
+});
 
 // 根据当前路由计算激活的菜单项
 const selectedKeys = computed(() => {
   const path = route.path;
   
-  // 路径映射到菜单key
   if (path.startsWith('/puzzles')) {
     return ['puzzles'];
   } else if (path.startsWith('/reviews')) {
@@ -96,18 +132,7 @@ const selectedKeys = computed(() => {
     return ['settings'];
   }
   
-  // 默认返回题目管理
   return ['puzzles'];
-});
-
-const currentPage = computed(() => {
-  const pathMap: { [key: string]: string } = {
-    '/puzzles': '题目管理',
-    '/reviews': '审核中心',
-    '/reports': '报表统计',
-    '/settings': '系统设置'
-  };
-  return pathMap[route.path] || 'Home';
 });
 
 // 处理用户菜单点击
@@ -115,11 +140,16 @@ const handleUserMenuClick = ({ key }: { key: string }) => {
   if (key === 'settings') {
     router.push('/settings/user-settings')
   } else if (key === 'logout') {
-    // 这里可以添加退出登录的逻辑
+    clearUserInfo()
     message.success('已退出登录')
     router.push('/login')
   }
 };
+
+// 组件挂载时获取用户信息
+onMounted(() => {
+  fetchUserInfo();
+});
 </script>
 
 <style scoped>
@@ -287,3 +317,5 @@ const handleUserMenuClick = ({ key }: { key: string }) => {
   }
 }
 </style>
+
+
