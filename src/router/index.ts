@@ -13,16 +13,16 @@ export const clearLoginStatusCache = () => {
 
 // 导入视图组件
 import HomeView from '../views/HomeView.vue'; // 首页视图
-import PuzzleManagement from '../views/PuzzleManagement.vue'; // 谜题管理视图
-import ReviewCenter from '../views/ReviewCenter.vue'; // 审核中心视图
-import Reports from '../views/Reports.vue'; // 数据报告视图
-import Settings from '../views/Settings.vue'; // 系统设置视图
-import EditPuzzle from '../views/EditPuzzle.vue';
-import CreatePuzzle from '../views/CreatePuzzle.vue';
-import EnumManagement from '../views/EnumManagement.vue'; // 枚举管理视图
-import GeneralSettings from '../views/GeneralSettings.vue'; // 通用设置视图
-import UserSettings from '../views/UserSettings.vue'; // 用户设置视图
-import Login from '../views/Login.vue'; // 登录视图
+import PuzzleListView from '../views/puzzle/PuzzleListView.vue'; // 谜题管理视图
+import ReviewCenterView from '../views/review/ReviewCenterView.vue'; // 审核中心视图
+import ReportsView from '../views/report/ReportsView.vue'; // 数据报告视图
+import SettingsView from '../views/settings/SettingsView.vue'; // 系统设置视图
+import EditPuzzleView from '../views/puzzle/EditPuzzleView.vue';
+import CreatePuzzleView from '../views/puzzle/CreatePuzzleView.vue';
+import EnumManagementView from '../views/settings/EnumManagementView.vue'; // 枚举管理视图
+import GeneralSettingsView from '../views/settings/GeneralSettingsView.vue'; // 通用设置视图
+import UserSettingsView from '../views/settings/UserSettingsView.vue'; // 用户设置视图
+import LoginView from '../views/auth/LoginView.vue'; // 登录视图
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -30,7 +30,7 @@ const router = createRouter({
     {
       path: '/login',
       name: 'login',
-      component: Login,
+      component: LoginView,
       meta: {
         title: '用户登录',
         requiresAuth: false // 登录页面不需要认证
@@ -48,7 +48,7 @@ const router = createRouter({
         {
           path: 'puzzles',
           name: 'puzzle-management',
-          component: PuzzleManagement,
+          component: PuzzleListView,
           meta: {
             requiresAuth: true
           }
@@ -56,7 +56,7 @@ const router = createRouter({
         {
           path: 'reviews',
           name: 'review-center',
-          component: ReviewCenter,
+          component: ReviewCenterView,
           meta: {
             requiresAuth: true
           }
@@ -64,7 +64,7 @@ const router = createRouter({
         {
           path: 'reports',
           name: 'reports',
-          component: Reports,
+          component: ReportsView,
           meta: {
             requiresAuth: true
           }
@@ -72,7 +72,7 @@ const router = createRouter({
         {
           path: 'settings',
           name: 'Settings',
-          component: Settings,
+          component: SettingsView,
           redirect: '/settings/general',
           meta: {
             requiresAuth: true
@@ -81,7 +81,7 @@ const router = createRouter({
             {
               path: 'general',
               name: 'GeneralSettings',
-              component: GeneralSettings,
+              component: GeneralSettingsView,
               meta: {
                 title: '通用设置',
                 requiresAuth: true
@@ -90,7 +90,7 @@ const router = createRouter({
             {
               path: 'enum-management',
               name: 'EnumManagement',
-              component: EnumManagement,
+              component: EnumManagementView,
               meta: {
                 title: '枚举管理',
                 requiresAuth: true
@@ -99,7 +99,7 @@ const router = createRouter({
             {
               path: 'user-settings',
               name: 'UserSettings',
-              component: UserSettings,
+              component: UserSettingsView,
               meta: {
                 title: '用户设置',
                 requiresAuth: true
@@ -110,7 +110,7 @@ const router = createRouter({
         {
           path: 'edit/:id',
           name: 'edit',
-          component: EditPuzzle,
+          component: EditPuzzleView,
           meta: {
             requiresAuth: true
           }
@@ -118,7 +118,7 @@ const router = createRouter({
         {
           path: 'create',
           name: 'create-puzzle',
-          component: CreatePuzzle,
+          component: CreatePuzzleView,
           meta: {
             requiresAuth: true
           }

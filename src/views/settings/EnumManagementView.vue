@@ -134,7 +134,8 @@
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue'
 import { message } from 'ant-design-vue'
-import { http } from '../utils/http'
+import { http } from '../../utils/http'
+import type { EnumPageRequest } from '../../types/PuzzleTypes'
 
 // 搜索表单
 const searchForm = ref({
@@ -264,14 +265,16 @@ const enumValueForm = ref({
 const fetchEnumGroups = async () => {
   loading.value = true
   try {
-    const params = {
+    // 构建分页查询请求体
+    const requestBody: EnumPageRequest = {
       pageNum: pagination.value.current,
       pageSize: pagination.value.pageSize,
-      code: searchForm.value.code,
-      description: searchForm.value.description
+      code: searchForm.value.code || undefined,
+      description: searchForm.value.description || undefined
     }
-    const response = await http.post('/m/enum/groups', params)
-    console.log('枚举组响应数据:', response)
+
+    const response = await http.post('/m/enum/groups', requestBody)
+    console.log('Request body:', requestBody, 'Response:', response)
     if (response.code === 200) {
       enumGroups.value = response.data
       pagination.value.total = response.total || response.data.length
@@ -313,14 +316,14 @@ const handleTableChange = (pag: any) => {
 const showEnumValues = async (record: any) => {
   selectedEnumGroup.value = record
   enumValuesModalVisible.value = true
-  await fetchEnumValues(record.id)
+  await fetchEnumValues(record.code)
 }
 
 // 获取枚举值列表
-const fetchEnumValues = async (groupId: string) => {
+const fetchEnumValues = async (groupCode: string) => {
   valuesLoading.value = true
   try {
-    const response = await http.post('/m/enum/group/values', { groupId })
+    const response = await http.get(`/m/enum/group/${groupCode}/values`)
     console.log('枚举值响应数据:', response)
     if (response.code === 200) {
       enumValues.value = response.data
@@ -492,7 +495,7 @@ const updateEnumLists = async () => {
     const updatedGroup = enumGroups.value.find(group => group.id === selectedEnumGroup.value.id)
     if (updatedGroup) {
       selectedEnumGroup.value = updatedGroup
-      await fetchEnumValues(updatedGroup.id)
+      await fetchEnumValues(updatedGroup.code)
     }
   }
 }

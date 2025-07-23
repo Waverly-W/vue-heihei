@@ -39,8 +39,8 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { message } from 'ant-design-vue';
-import PuzzleForm from '../components/PuzzleForm.vue';
-import { http } from '../utils/http';
+import PuzzleForm from '../../components/business/PuzzleForm.vue';
+import { http } from '../../utils/http';
 
 const router = useRouter();
 const puzzleFace = ref('');

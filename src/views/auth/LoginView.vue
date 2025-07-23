@@ -72,8 +72,8 @@
 import { ref, reactive } from 'vue'
 import { message } from 'ant-design-vue'
 import { useRouter, useRoute } from 'vue-router'
-import { http } from '../utils/http'
-import { clearLoginStatusCache } from '../router/index'
+import { http } from '../../utils/http'
+import { clearLoginStatusCache } from '../../router/index'
 
 const router = useRouter()
 const route = useRoute()

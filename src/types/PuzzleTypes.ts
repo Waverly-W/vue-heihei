@@ -23,6 +23,40 @@ export interface PuzzleData {
   valid: boolean
 }
 
+// 新的海龟汤数据结构，对应API返回的格式
+export interface SoupData {
+  id: string
+  title: string
+  description: string
+  answer: string
+  hints: string[]
+  tags: string[]
+  playCount: number
+  rating: number
+  status: string
+  createdBy: string
+  aiGenerated: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+// 海龟汤表单数据结构
+export interface SoupFormData {
+  id?: string
+  title: string
+  description: string
+  answer: string
+  hints: string[]
+  tags: string[]
+  status: string
+  aiGenerated: boolean
+  rating?: number
+  playCount?: number
+  createdBy?: string
+  createdAt?: string
+  updatedAt?: string
+}
+
 export interface EnumValue {
   id: number
   valueCode: string
@@ -44,4 +78,28 @@ export interface EnumResponse {
   code: string
   message: string
   data: EnumData
+}
+
+// 分页请求基类
+export interface PageRequest {
+  pageNum: number
+  pageSize: number
+}
+
+// 汤底分页查询请求参数
+export interface SoupPageRequest extends PageRequest {
+  titleKeyword?: string
+  tags?: string[]
+  status?: string
+  createdBy?: string
+  aiGenerated?: boolean
+  minRating?: number
+  createdAtStart?: string
+  createdAtEnd?: string
+}
+
+// 枚举分页查询请求参数
+export interface EnumPageRequest extends PageRequest {
+  code?: string
+  description?: string
 }

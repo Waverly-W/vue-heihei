@@ -67,7 +67,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { message } from 'ant-design-vue'
 import { PlusOutlined } from '@ant-design/icons-vue'
 import type { UploadChangeParam } from 'ant-design-vue'
-import { http } from '../utils/http'
+import { http } from '../../utils/http'
 
 // 用户信息接口类型
 interface UserInfo {
