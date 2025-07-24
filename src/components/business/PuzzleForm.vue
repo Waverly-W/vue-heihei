@@ -87,7 +87,7 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref, defineProps, defineEmits, watch, withDefaults } from 'vue';
+import { reactive, ref, watch } from 'vue';
 import type { FormInstance } from 'ant-design-vue';
 import type { SoupFormData } from '../../types/PuzzleTypes';
 

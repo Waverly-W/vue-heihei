@@ -29,6 +29,11 @@
     
     <puzzle-form
       :initial-data="formData"
+      :status-options="statusOptions"
+      :status-loading="statusLoading"
+      :tag-options="tagOptions"
+      :tag-loading="tagLoading"
+      :is-create-mode="true"
       @submit="handleSubmit"
       @cancel="handleCancel"
     />
@@ -36,7 +41,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { message } from 'ant-design-vue';
 import PuzzleForm from '../../components/business/PuzzleForm.vue';
@@ -47,6 +52,52 @@ const puzzleFace = ref('');
 const puzzleBase = ref('');
 const parsing = ref(false);
 const formData = ref<any>(null);
+
+// 枚举值数据
+const statusOptions = ref<Array<{code: string, value: string, description: string}>>([]);
+const statusLoading = ref(false);
+const tagOptions = ref<Array<{code: string, value: string, description: string}>>([]);
+const tagLoading = ref(false);
+
+// 获取状态枚举值
+const getStatusOptions = async () => {
+  statusLoading.value = true;
+  try {
+    const response = await http.get('/m/enum/group/SOUP_STATUS/values');
+    if ((response.code === 0 || response.code === 200) && response.data) {
+      statusOptions.value = response.data.filter((item: any) => item.active).map((item: any) => ({
+        code: item.code,
+        value: item.value,
+        description: item.description
+      }));
+      console.log('获取到的状态选项:', statusOptions.value);
+    }
+  } catch (error) {
+    console.error('Failed to fetch status options:', error);
+  } finally {
+    statusLoading.value = false;
+  }
+};
+
+// 获取标签枚举值
+const getTagOptions = async () => {
+  tagLoading.value = true;
+  try {
+    const response = await http.get('/app/enum/groups/SOUP_TAG/values');
+    if ((response.code === 0 || response.code === 200) && response.data) {
+      tagOptions.value = response.data.filter((item: any) => item.active).map((item: any) => ({
+        code: item.code,
+        value: item.value,
+        description: item.description
+      }));
+      console.log('获取到的标签选项:', tagOptions.value);
+    }
+  } catch (error) {
+    console.error('Failed to fetch tag options:', error);
+  } finally {
+    tagLoading.value = false;
+  }
+};
 
 // 处理文本解析
 const handleParse = async () => {
@@ -106,6 +157,14 @@ const handleSubmit = async (formState) => {
 const handleCancel = () => {
   router.push('/puzzles');
 };
+
+// 组件挂载时获取枚举值
+onMounted(async () => {
+  await Promise.all([
+    getStatusOptions(),
+    getTagOptions()
+  ]);
+});
 </script>
 
 <style scoped>
