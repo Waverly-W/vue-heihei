@@ -26,6 +26,12 @@
             </template>
             枚举管理
           </a-menu-item>
+          <a-menu-item key="chat-test">
+            <template #icon>
+              <MessageOutlined />
+            </template>
+            对话测试
+          </a-menu-item>
         </a-menu>
       </a-col>
       <a-col :span="20">
@@ -36,9 +42,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { SettingOutlined, OrderedListOutlined, UserOutlined } from '@ant-design/icons-vue'
+import { SettingOutlined, OrderedListOutlined, UserOutlined, MessageOutlined } from '@ant-design/icons-vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -50,6 +56,8 @@ const selectedKeys = computed(() => {
     return ['enum']
   } else if (path.includes('user-settings')) {
     return ['user-settings']
+  } else if (path.includes('chat-test')) {
+    return ['chat-test']
   } else {
     return ['general']
   }
@@ -61,6 +69,8 @@ const handleMenuSelect = ({ key }: { key: string }) => {
     router.push('/settings/enum-management')
   } else if (key === 'user-settings') {
     router.push('/settings/user-settings')
+  } else if (key === 'chat-test') {
+    router.push('/settings/chat-test')
   } else {
     router.push('/settings/general')
   }

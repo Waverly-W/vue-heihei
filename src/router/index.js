@@ -19,6 +19,7 @@ import CreatePuzzleView from '../views/puzzle/CreatePuzzleView.vue';
 import EnumManagementView from '../views/settings/EnumManagementView.vue'; // 枚举管理视图
 import GeneralSettingsView from '../views/settings/GeneralSettingsView.vue'; // 通用设置视图
 import UserSettingsView from '../views/settings/UserSettingsView.vue'; // 用户设置视图
+import ChatTestView from '../views/settings/ChatTestView.vue'; // 对话测试视图
 import LoginView from '../views/auth/LoginView.vue'; // 登录视图
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -98,6 +99,15 @@ const router = createRouter({
                             component: UserSettingsView,
                             meta: {
                                 title: '用户设置',
+                                requiresAuth: true
+                            }
+                        },
+                        {
+                            path: 'chat-test',
+                            name: 'ChatTest',
+                            component: ChatTestView,
+                            meta: {
+                                title: '对话测试',
                                 requiresAuth: true
                             }
                         }
