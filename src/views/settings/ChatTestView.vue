@@ -611,9 +611,9 @@ const formatContent = (content: string) => {
 
 /* 侧边栏样式 */
 .sidebar {
-  width: 300px;
-  min-width: 300px;
-  max-width: 300px;
+  width: 200px;
+  min-width: 200px;
+  max-width: 200px;
   background: #fafafa;
   border-right: 1px solid #e8e8e8;
   display: flex;
